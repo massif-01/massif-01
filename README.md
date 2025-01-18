@@ -1,1 +1,1 @@
-[![trophy](https://github-profile-trophy.vercel.app/?username=ryo-ma)](https://github.com/massif-01)
+[![trophy](https://github-profile-trophy.vercel.app/?username=massif-01)](https://github.com/ryo-ma/github-profile-trophy)
