@@ -1,7 +1,4 @@
-
-
 ![](./profile-3d-contrib/profile-gitblock.svg)
 
-<div align="center">
-  <img src="https://komarev.com/ghpvc/?username=massif-01&color=blue" alt="访问量统计">
-</div>
+[![trophy](https://github-profile-trophy.vercel.app/?username=massif-01&theme=gruvbox&no-bg=true&margin-w=10&title=-Reviews)](https://github.com/ryo-ma/github-profile-trophy)
+
