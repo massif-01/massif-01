@@ -33,3 +33,51 @@ jobs:
           plugin_followup: yes
           plugin_followup_sections: user
           plugin_followup_indepth: yes
+
+      # 生成 contributors.categories 插件 - 贡献者分类统计
+      - name: Generate contributors categories metrics
+        uses: lowlighter/metrics@latest
+        with:
+          filename: metrics.plugin.contributors.categories.svg
+          token: ${{ secrets.METRICS_TOKEN }}
+          base: ""
+          plugin_contributors: yes
+          plugin_contributors_categories: |
+            {
+              "📚 Documentation": ["README.md", "docs/**"],
+              "💻 Code": ["src/**", "lib/**"],
+              "🎨 Style": ["*.css", "*.scss"],
+              "#️⃣ Others": ["*"]
+            }
+
+      # 生成 contributors.contributions 插件 - 贡献者贡献详情
+      - name: Generate contributors contributions metrics
+        uses: lowlighter/metrics@latest
+        with:
+          filename: metrics.plugin.contributors.contributions.svg
+          token: ${{ secrets.METRICS_TOKEN }}
+          base: ""
+          plugin_contributors: yes
+          plugin_contributors_contributions: yes
+
+      # 生成 achievements.compact 插件 - 成就徽章（紧凑模式）
+      - name: Generate achievements compact metrics
+        uses: lowlighter/metrics@latest
+        with:
+          filename: metrics.plugin.achievements.compact.svg
+          token: ${{ secrets.METRICS_TOKEN }}
+          base: ""
+          plugin_achievements: yes
+          plugin_achievements_display: compact
+          plugin_achievements_threshold: C
+
+      # 生成 leetcode 插件 - LeetCode 统计
+      - name: Generate LeetCode metrics
+        uses: lowlighter/metrics@latest
+        with:
+          filename: metrics.plugin.leetcode.svg
+          token: ${{ secrets.METRICS_TOKEN }}
+          base: ""
+          plugin_leetcode: yes
+          plugin_leetcode_user: .user.login
+          plugin_leetcode_sections: solved, skills, recent
