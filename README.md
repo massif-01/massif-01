@@ -1,5 +1,7 @@
 <div align="center">
 
+<h1><img src="https://emojis.slackmojis.com/emojis/images/1643508985/39092/cat-roll.gif?1643508985" width="30"/> Hey! Nice to see you.</h1>
+
 <!-- Followup 插件 - 用户视角 -->
 ![Metrics - Followup User](https://github.com/massif-01/massif-01/blob/main/metrics.plugin.followup.user.svg)
 
