@@ -4,10 +4,10 @@
 
 <p></p>
 
-![Trophy](.github/assets/trophy.svg)
+<img src=".github/assets/trophy.svg" alt="Trophy">
 
 <p></p>
 
-![](./profile-3d-contrib/profile-south-season-animate.svg)
+<img src="./profile-3d-contrib/profile-south-season-animate.svg" alt="Profile 3D Contribution">
 
 </div>
