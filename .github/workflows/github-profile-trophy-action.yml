@@ -1,0 +1,59 @@
+name: Generate Trophy
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # 每天午夜运行一次
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史
+
+      - name: Create assets directory
+        run: mkdir -p .github/assets
+
+      - name: Generate trophy card
+        uses: soulteary/github-profile-trophy-action@v1.0.0
+        with:
+          options: 'username=${{ github.repository_owner }}&theme=gruvbox&no-bg=true&margin-w=10&title=-Reviews'
+          path: .github/assets/trophy.svg
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify file generation
+        run: |
+          echo "Checking if trophy file was generated..."
+          if [ -f .github/assets/trophy.svg ]; then
+            echo "✓ Trophy file generated successfully"
+            ls -lh .github/assets/trophy.svg
+            echo "File size: $(stat -f%z .github/assets/trophy.svg 2>/dev/null || stat -c%s .github/assets/trophy.svg) bytes"
+          else
+            echo "✗ Error: Trophy file not found at .github/assets/trophy.svg"
+            echo "Directory contents:"
+            ls -la .github/assets/ || echo "Directory doesn't exist"
+            exit 1
+          fi
+
+      - name: Commit trophy card
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/assets/trophy.svg
+          
+          # 检查是否有变化
+          if git diff --staged --quiet; then
+            echo "No changes to commit - trophy file is up to date"
+          else
+            echo "Committing changes..."
+            git commit -m "Update trophy card [skip ci]"
+            git push
+            echo "✓ Changes pushed successfully"
+          fi
