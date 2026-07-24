@@ -2,7 +2,7 @@ name: Generate Trophy
 
 on:
   schedule:
-    - cron: "0 0 * * *" # 每天午夜运行一次
+    - cron: "17 0 * * *" # 避开 GitHub Actions 每小时整点的调度高峰
   workflow_dispatch:
 
 jobs:
@@ -21,26 +21,61 @@ jobs:
       - name: Create assets directory
         run: mkdir -p .github/assets
 
-      - name: Generate trophy card
-        uses: soulteary/github-profile-trophy-action@v1.0.0
-        with:
-          options: 'username=${{ github.repository_owner }}&theme=gruvbox&no-bg=true&margin-w=10&title=-Experience'
-          path: .github/assets/trophy.svg
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify file generation
+      - name: Download pinned trophy generator
+        env:
+          TROPHY_BINARY: ${{ runner.temp }}/github-profile-trophy
         run: |
-          echo "Checking if trophy file was generated..."
-          if [ -f .github/assets/trophy.svg ]; then
-            echo "✓ Trophy file generated successfully"
-            ls -lh .github/assets/trophy.svg
-            echo "File size: $(stat -f%z .github/assets/trophy.svg 2>/dev/null || stat -c%s .github/assets/trophy.svg) bytes"
-          else
-            echo "✗ Error: Trophy file not found at .github/assets/trophy.svg"
-            echo "Directory contents:"
-            ls -la .github/assets/ || echo "Directory doesn't exist"
-            exit 1
-          fi
+          curl --fail --location --silent --show-error \
+            https://github.com/soulteary/github-profile-trophy/releases/download/v1.0.0/github-profile-trophy-linux-amd64 \
+            --output "$TROPHY_BINARY"
+          echo "0abd1d942a7bec09301c0c1325d3f2d9ea06b70d950b96c4756095808304da4b  $TROPHY_BINARY" | sha256sum --check
+          chmod +x "$TROPHY_BINARY"
+
+      - name: Verify metrics token
+        env:
+          GH_TOKEN: ${{ secrets.METRICS_TOKEN }}
+        run: |
+          gh api graphql \
+            -f query='query($login: String!) {
+              viewer { login }
+              rateLimit { remaining resetAt }
+              user(login: $login) {
+                repositories(
+                  first: 50
+                  ownerAffiliations: OWNER
+                  orderBy: { field: STARGAZERS, direction: DESC }
+                ) {
+                  totalCount
+                  nodes {
+                    languages(first: 3, orderBy: { field: SIZE, direction: DESC }) {
+                      nodes { name }
+                    }
+                    stargazers { totalCount }
+                    createdAt
+                  }
+                }
+              }
+            }' \
+            -F login="${{ github.repository_owner }}" \
+            --jq '"viewer=\(.data.viewer.login) repositories=\(.data.user.repositories.totalCount) stars=\([.data.user.repositories.nodes[].stargazers.totalCount] | add) languages=\([.data.user.repositories.nodes[].languages.nodes[].name] | unique | length) remaining=\(.data.rateLimit.remaining) resetAt=\(.data.rateLimit.resetAt)"'
+
+      - name: Generate trophy card
+        env:
+          GITHUB_TOKEN1: ${{ secrets.METRICS_TOKEN }}
+          TROPHY_BINARY: ${{ runner.temp }}/github-profile-trophy
+        run: |
+          "$TROPHY_BINARY" \
+            --username="${{ github.repository_owner }}" \
+            --theme=gruvbox \
+            --no-bg=true \
+            --margin-w=10 \
+            --title=-Experience \
+            --output=.github/assets/trophy.candidate.svg
+
+      - name: Validate trophy data
+        run: |
+          python3 .github/scripts/validate_trophy.py .github/assets/trophy.candidate.svg
+          mv .github/assets/trophy.candidate.svg .github/assets/trophy.svg
 
       - name: Commit trophy card
         run: |
