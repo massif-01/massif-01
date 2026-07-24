@@ -4,7 +4,7 @@
 
 <p></p>
 
-<img src=".github/assets/trophy.svg" alt="Trophy">
+<img src=".github/assets/trophy.svg?v=d1cc471481d1" alt="Trophy">
 
 <p></p>
 
