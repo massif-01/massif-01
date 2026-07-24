@@ -2,7 +2,7 @@ name: Generate Trophy
 
 on:
   schedule:
-    - cron: "0 0 * * *" # 每天午夜运行一次
+    - cron: "17 0 * * *" # 避开 GitHub Actions 每小时整点的调度高峰
   workflow_dispatch:
 
 jobs:
@@ -25,22 +25,13 @@ jobs:
         uses: soulteary/github-profile-trophy-action@v1.0.0
         with:
           options: 'username=${{ github.repository_owner }}&theme=gruvbox&no-bg=true&margin-w=10&title=-Experience'
-          path: .github/assets/trophy.svg
+          path: .github/assets/trophy.candidate.svg
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify file generation
+      - name: Validate trophy data
         run: |
-          echo "Checking if trophy file was generated..."
-          if [ -f .github/assets/trophy.svg ]; then
-            echo "✓ Trophy file generated successfully"
-            ls -lh .github/assets/trophy.svg
-            echo "File size: $(stat -f%z .github/assets/trophy.svg 2>/dev/null || stat -c%s .github/assets/trophy.svg) bytes"
-          else
-            echo "✗ Error: Trophy file not found at .github/assets/trophy.svg"
-            echo "Directory contents:"
-            ls -la .github/assets/ || echo "Directory doesn't exist"
-            exit 1
-          fi
+          python3 .github/scripts/validate_trophy.py .github/assets/trophy.candidate.svg
+          mv .github/assets/trophy.candidate.svg .github/assets/trophy.svg
 
       - name: Commit trophy card
         run: |
