@@ -40,11 +40,24 @@ jobs:
               viewer { login }
               rateLimit { remaining resetAt }
               user(login: $login) {
-                repositories(first: 1, ownerAffiliations: OWNER) { totalCount }
+                repositories(
+                  first: 50
+                  ownerAffiliations: OWNER
+                  orderBy: { field: STARGAZERS, direction: DESC }
+                ) {
+                  totalCount
+                  nodes {
+                    languages(first: 3, orderBy: { field: SIZE, direction: DESC }) {
+                      nodes { name }
+                    }
+                    stargazers { totalCount }
+                    createdAt
+                  }
+                }
               }
             }' \
             -F login="${{ github.repository_owner }}" \
-            --jq '"viewer=\(.data.viewer.login) repositories=\(.data.user.repositories.totalCount) remaining=\(.data.rateLimit.remaining) resetAt=\(.data.rateLimit.resetAt)"'
+            --jq '"viewer=\(.data.viewer.login) repositories=\(.data.user.repositories.totalCount) stars=\([.data.user.repositories.nodes[].stargazers.totalCount] | add) languages=\([.data.user.repositories.nodes[].languages.nodes[].name] | unique | length) remaining=\(.data.rateLimit.remaining) resetAt=\(.data.rateLimit.resetAt)"'
 
       - name: Generate trophy card
         env:
