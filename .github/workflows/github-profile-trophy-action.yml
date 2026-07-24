@@ -76,12 +76,17 @@ jobs:
         run: |
           python3 .github/scripts/validate_trophy.py .github/assets/trophy.candidate.svg
           mv .github/assets/trophy.candidate.svg .github/assets/trophy.svg
+          TROPHY_CACHE_KEY="$(sha256sum .github/assets/trophy.svg | cut -c1-12)"
+          sed -E -i \
+            "s#\\.github/assets/trophy\\.svg(\\?v=[^\"]+)?#.github/assets/trophy.svg?v=${TROPHY_CACHE_KEY}#" \
+            README.md
+          grep -Fq ".github/assets/trophy.svg?v=${TROPHY_CACHE_KEY}" README.md
 
       - name: Commit trophy card
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/assets/trophy.svg
+          git add .github/assets/trophy.svg README.md
           
           # 检查是否有变化
           if git diff --staged --quiet; then
