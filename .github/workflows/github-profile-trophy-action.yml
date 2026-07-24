@@ -31,6 +31,21 @@ jobs:
           echo "0abd1d942a7bec09301c0c1325d3f2d9ea06b70d950b96c4756095808304da4b  $TROPHY_BINARY" | sha256sum --check
           chmod +x "$TROPHY_BINARY"
 
+      - name: Verify metrics token
+        env:
+          GH_TOKEN: ${{ secrets.METRICS_TOKEN }}
+        run: |
+          gh api graphql \
+            -f query='query($login: String!) {
+              viewer { login }
+              rateLimit { remaining resetAt }
+              user(login: $login) {
+                repositories(first: 1, ownerAffiliations: OWNER) { totalCount }
+              }
+            }' \
+            -F login="${{ github.repository_owner }}" \
+            --jq '"viewer=\(.data.viewer.login) repositories=\(.data.user.repositories.totalCount) remaining=\(.data.rateLimit.remaining) resetAt=\(.data.rateLimit.resetAt)"'
+
       - name: Generate trophy card
         env:
           GITHUB_TOKEN1: ${{ secrets.METRICS_TOKEN }}
